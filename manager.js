@@ -17,7 +17,8 @@ async function getStreamInfo(fid, cid) {
         return streamsInfo.get(fid);
     } else {
         try {
-            const res = await axios.get(getFullLink(`${linkStart}/${cid}/${fid}/blob`));
+            const fulllink = await getFullLink(`${linkStart}/${cid}/${fid}/blob`);
+            const res = await axios.get(fulllink);
             if (!res.data.chunks || !res.data.size) return null;
             if (!res.data.chunkSize) res.data.chunkSize = oldChunkSize;
             res.data.type = getTypeFromName(res.data.name);
@@ -98,9 +99,10 @@ async function getDownloadBuffer(cid, streamInfo, start, controller) {
         diff = endByte - streamInfo.chunkSize;
         endByte -= diff;
     }
+    const chunkcurrent = await getFullLink(`${linkStart}/${cid}/${streamInfo.chunks[chunkIndex]}/blob`);
     //console.log(`${chunkIndex} | start: ${start}; max: ${streamInfo.size}; diff: ${diff}; abuff: ${allowedBuffSize}; ${markerAtChunk} - ${endByte}`)
     arr.push(
-        axios.get(getFullLink(`${linkStart}/${cid}/${streamInfo.chunks[chunkIndex]}/blob`), {
+        axios.get(chunkcurrent, {
             responseType: 'arraybuffer',
             signal: controller.signal,
             headers: {
@@ -110,8 +112,9 @@ async function getDownloadBuffer(cid, streamInfo, start, controller) {
     )
 
     if (chunkIndex + 1 < streamInfo.chunks.length && diff > 0) {
+    const chunknext = await getFullLink(`${linkStart}/${cid}/${streamInfo.chunks[chunkIndex + 1]}/blob`);
         arr.push(
-            axios.get(getFullLink(`${linkStart}/${cid}/${streamInfo.chunks[chunkIndex + 1]}/blob`), {
+            axios.get(chunknext, {
                 responseType: 'arraybuffer',
                 signal: controller.signal,
                 headers: {
