@@ -5,9 +5,9 @@ const stream = require('stream');
 const router = express.Router();
 const path = require('path');
 //router.use(ControlBandwidth);
-router.get('/file11', (req, res) => {
-    res.sendFile(path.join(__dirname, '/h.html'));
-});
+// router.get('/file11', (req, res) => {
+//     res.sendFile(path.join(__dirname, '/h.html'));
+// });
 
 router.get("/:cid/:fid", async function (req, res) {
     let range = req.headers.range;

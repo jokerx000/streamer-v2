@@ -1,4 +1,5 @@
 const axios = require("axios");
+const { getFullLink } = require("./dist/getlink");
 require('dotenv').config()
 
 // --------- CONFIG -------------
@@ -16,7 +17,7 @@ async function getStreamInfo(fid, cid) {
         return streamsInfo.get(fid);
     } else {
         try {
-            const res = await axios.get(`${linkStart}/${cid}/${fid}/blob`);
+            const res = await axios.get(getFullLink(`${linkStart}/${cid}/${fid}/blob`));
             if (!res.data.chunks || !res.data.size) return null;
             if (!res.data.chunkSize) res.data.chunkSize = oldChunkSize;
             res.data.type = getTypeFromName(res.data.name);
@@ -99,7 +100,7 @@ async function getDownloadBuffer(cid, streamInfo, start, controller) {
     }
     //console.log(`${chunkIndex} | start: ${start}; max: ${streamInfo.size}; diff: ${diff}; abuff: ${allowedBuffSize}; ${markerAtChunk} - ${endByte}`)
     arr.push(
-        axios.get(`${linkStart}/${cid}/${streamInfo.chunks[chunkIndex]}/blob`, {
+        axios.get(getFullLink(`${linkStart}/${cid}/${streamInfo.chunks[chunkIndex]}/blob`), {
             responseType: 'arraybuffer',
             signal: controller.signal,
             headers: {
@@ -110,7 +111,7 @@ async function getDownloadBuffer(cid, streamInfo, start, controller) {
 
     if (chunkIndex + 1 < streamInfo.chunks.length && diff > 0) {
         arr.push(
-            axios.get(`${linkStart}/${cid}/${streamInfo.chunks[chunkIndex + 1]}/blob`, {
+            axios.get(getFullLink(`${linkStart}/${cid}/${streamInfo.chunks[chunkIndex + 1]}/blob`), {
                 responseType: 'arraybuffer',
                 signal: controller.signal,
                 headers: {

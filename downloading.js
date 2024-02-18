@@ -1,5 +1,6 @@
 const express = require('express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
+const { getFullLink } = require('./dist/getlink.js');
 
 const router = express.Router();
 
@@ -11,9 +12,12 @@ const dwnp = createProxyMiddleware({
     changeOrigin: true,
     ws: false,
     target: 'https://cdn.discordapp.com/attachments/',
-    pathRewrite: (path, req) => {
+    pathRewrite: async (path, req) => {
         const { cid, fid } = req.params;
-        return `${cid}/${fid}/blob`;
+        const parameters = await getFullLink(`https://cdn.discordapp.com/attachments/${cid}/${fid}/blob`);
+        const fullpath = parameters.split('?')[1];
+        // console.log(parameters);
+        return `${cid}/${fid}/blob?${fullpath}`;
     },
     logger: console,
 })

@@ -1,2 +1,7 @@
 /node_modules
+/dist
 .env
+.env.example
+readme.md
+render.yaml
+package-lock.json
